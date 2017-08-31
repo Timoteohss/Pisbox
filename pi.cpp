@@ -24,42 +24,44 @@ int main(int argc, const char *argv[])
     cv::Mat frame = image.clone();
     cv::Mat dBuffer = frame.clone();
 
-    //variaveis de controle aqui
-    cv::Mat ctrl = cv::Mat(400,300,CV_8UC3,cvScalar(0.));
-    cv::Mat ctrl_f = ctrl.clone();
-    cv::Mat ctrl_db = ctrl_f.clone();
-
     //variaveis de ambiente
     int trackbarWidth = 130;
+    bool checked_nn = true;
+    bool checked_bi = false;
     
 
     cv::namedWindow(WINDOW_NAME);
-    cv::namedWindow("Controles");
     cvui::init(WINDOW_NAME, 20); //Aperte "q" para sair
-    cvui::init("Controles", 20);
+    
 
     while(true) {
         dBuffer.copyTo(frame);
-        ctrl_db.copyTo(ctrl_f);
+       
 
         //botao para sair
-        if (cvui::button(ctrl_f, ctrl_f.cols - 70, ctrl_f.rows - 30, "&Quit")) {
+        if (cvui::button(frame, frame.cols - 70, frame.rows - 30, "&Quit")) {
             break;
         }
 
+        if(cvui::button(frame, 10, 10, "Dobrar resolucao")) {
+            break;
+        }
 
-        cvui::window(ctrl_f, 10, 10, 200, 290, "Controle 1");
+        if(cvui::button(frame, 10, 40, "Reduzir resolucao")) {
+            break;
+        }
 
+        if(cvui::checkbox(frame, 10, 70, "Vizinho mais proximo", &checked_nn)) {
+            if(checked_bi) {
+                checked_bi = !checked_bi;
+            }
+        }
 
-        cvui::beginColumn(ctrl_f, 40, 40,-1,-1,10);
-
-
-
-        cvui::endColumn();
-
-
-
-
+        if(cvui::checkbox(frame, 10, 90, "Bicubica", &checked_bi)) {
+            if(checked_nn) {
+                checked_nn = !checked_nn;
+            }
+        }
 
 
 
@@ -67,7 +69,6 @@ int main(int argc, const char *argv[])
 
         cvui::update();
         cv::imshow(WINDOW_NAME, frame);
-        cv::imshow("Controles", ctrl_f);
     }
 
     return 0;
