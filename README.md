@@ -7,6 +7,7 @@ Pisbox é um sandbox para minhas aulas de Processamento de Imagens, utilizando a
 Este é o primeiro push, então não temos muitas novidades...
 
 > Ainda virão grandes coisas...
+
 É o que um dia eu disse
 
 ## Tecnologias 
@@ -23,7 +24,7 @@ Pisbox requer que você tenha instalado o [OpenCV](http://opencv.org/) versão 2
 
 Para compilar o projeto inicial, apenas escreva
 
-'''sh
-g++ -std=c++11 pi.cpp -o pisdbox `pkg-config --libs opencv`
-./pisdbox <nome da imagem>
-'''
+```sh
+$ g++ -std=c++11 pi.cpp -o pisdbox `pkg-config --libs opencv`
+$ ./pisdbox <nome da imagem>
+```
