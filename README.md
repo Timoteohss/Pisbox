@@ -1,4 +1,4 @@
-#Pisbox
+# Pisbox
 
 Pisbox é um sandbox para minhas aulas de Processamento de Imagens, utilizando apenas OpenCV para manipulação, inclusive com uma interface gráfica utilizando primitivas de desenho do OpenCV!
 
@@ -13,11 +13,11 @@ Este é o primeiro push, então não temos muitas novidades...
 
 Pisbox utiliza as seguintes tecnologias para se fazer útil:
 
-* [OpenCV] - Biblioteca para manipulação das imagens
+* [OpenCV](http://opencv.org/)  - Biblioteca para manipulação das imagens
 
 Só!
 
-###Instalação
+### Instalação
 
 Pisbox requer que você tenha instalado o [OpenCV](http://opencv.org/) versão 2.4.3 ou mais nova.
 
