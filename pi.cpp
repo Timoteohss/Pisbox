@@ -62,7 +62,7 @@ int main(int argc, const char *argv[])
             cvui::space(5);
 
             if (cvui::button(frame , 70, 110 , "Gerar")) {
-                break;
+                rotulacao(dBuffer);
             }
 
         cvui::endColumn();
@@ -78,6 +78,52 @@ int main(int argc, const char *argv[])
     return 0;
 }
 
-void rotulacao(cv::Mat image) {
+class rotulo {
+    public:
+        cv::Scalar getCor();
+        string getNome();
+        rotulo();
+    
+    private:
+        cv::Scalar setCor();
+        cv::Scalar cor;
+        string nome;
+};
 
+cv::Scalar rotulo::setCor() {
+    cv::RNG rng(12345);
+    cor = cv::Scalar(rng.uniform(0,255), rng.uniform(0, 255), rng.uniform(0, 255));
+}
+
+string rotulo::getNome(){
+    return nome;
+}
+
+cv::Scalar rotulo::getCor(){
+    return cor;
+}
+
+
+void rotulacao(cv::Mat image) {
+    vector<rotulo> v_rotulos;
+    cv::Mat img_rotulada = cv::Mat::zeros(image.cols, image.rows, CV_8UC3);
+   
+
+     for (int y = 0; y <= image.rows  ; y++) {
+        for (int x = 0; x <= image.cols  ; x++) {
+            //cout << (int)image.at<uchar>(y,x) << endl;
+            int r = (int)image.at<uchar>(y    ,x - 1);
+            int p = (int)image.at<uchar>(y - 1,x    );
+            
+            //Se p = 0 então verifica o próximo pixel;
+            //Se p =1, examina r e t
+            if((int)image.at<uchar>(y,x) != 0) {
+                if(r == 0 && p == 0) {
+                    //novo rotulo
+                } else if (r != 0 && p == 0 || r == 0 && p != 0) {
+                    //rotula com o valor de r ou p
+                }
+            }
+        }
+    }
 }
