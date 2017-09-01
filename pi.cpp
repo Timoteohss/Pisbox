@@ -10,6 +10,9 @@
 
 // g++ -std=c++11 pi.cpp -o pisdbox `pkg-config --libs opencv`
 
+void nova_NN(cv::Mat image, float ratio);
+void nova_BI(cv::Mat image, float ratio);
+
 using namespace std;
 
 
@@ -44,11 +47,17 @@ int main(int argc, const char *argv[])
         }
 
         if(cvui::button(frame, 10, 10, "Dobrar resolucao")) {
-            break;
+            if(checked_nn)
+                nova_NN(image,2.0);
+            else
+                nova_BI(image,2.0);
         }
 
         if(cvui::button(frame, 10, 40, "Reduzir resolucao")) {
-            break;
+            if(checked_nn)
+                nova_NN(image,0.5);
+            else
+                nova_BI(image,0.5);
         }
 
         if(cvui::checkbox(frame, 10, 70, "Vizinho mais proximo", &checked_nn)) {
@@ -74,6 +83,71 @@ int main(int argc, const char *argv[])
     return 0;
 }
 
+void nova_NN(cv::Mat image, float ratio){
+    cv::Mat nn_n = cv::Mat::zeros( floor(image.cols * ratio), floor(image.rows * ratio), CV_8UC3);
+    cout << nn_n.cols << ":" << nn_n.rows << endl;
+
+    for (int y = 0; y <= image.rows - 3 ; y++) {
+        for (int x = 0; x <= image.cols  ; x++) {
+            float x_x = floor( x * ratio);
+            float y_y = floor( y * ratio);            
+
+            nn_n.at<cv::Vec3b>( y_y     , x_x    ) = image.at<cv::Vec3b>( y , x );
+            nn_n.at<cv::Vec3b>( y_y     , x_x + 1) = image.at<cv::Vec3b>( y , x + 1 );
+            nn_n.at<cv::Vec3b>( y_y + 1 , x_x    ) = image.at<cv::Vec3b>( y + 1 , x );
+            nn_n.at<cv::Vec3b>( y_y + 1 , x_x + 1) = image.at<cv::Vec3b>( y + 1 , x + 1 );
+        }
+    }
+
+    cv::namedWindow("Nova_nn", cv::WINDOW_AUTOSIZE);
+    cv::imshow("Nova_nn",nn_n);
+}
+
+void nova_BI(cv::Mat image, float ratio){
+    cv::Mat bi_n = cv::Mat::zeros( floor(image.cols * ratio), floor(image.rows * ratio), CV_8UC3);
+     
+    for (int y = 0; y <= image.rows - 3 ; y++) {
+        for (int x = 0; x <= image.cols - 3 ; x++) {
+            bi_n.at<cv::Vec3b>( floor(y * ratio), floor(x * ratio) ) = image.at<cv::Vec3b>( y , x );
+        }
+    }
+
+     for (int y = 0; y <= bi_n.rows - 3 ; y++) {
+        for (int x = 0; x <= bi_n.cols - 3 ; x++) {
+            if(bi_n.at<cv::Vec3b>(x , y)[0] == 0 && x % 2 == 0) {
+                bi_n.at<cv::Vec3b>(x , y)[0] = (bi_n.at<cv::Vec3b>(x, y + 1)[0] + bi_n.at<cv::Vec3b>(x, y - 1)[0]) / 2;
+                bi_n.at<cv::Vec3b>(x , y)[1] = (bi_n.at<cv::Vec3b>(x, y + 1)[1] + bi_n.at<cv::Vec3b>(x, y - 1)[1]) / 2;
+                bi_n.at<cv::Vec3b>(x , y)[2] = (bi_n.at<cv::Vec3b>(x, y + 1)[2] + bi_n.at<cv::Vec3b>(x, y - 1)[2]) / 2;
+            
+            }
+        }
+    }
+
+    int conta = 0;
+    for (int y = 0; y <= bi_n.rows - 3 ; y++) {
+        for (int x = 0; x <= bi_n.cols - 3 ; x++) {
+
+            if (bi_n.at<cv::Vec3b>(x , y)[0] == 0 && x % 2 != 0) {
+                if(conta %  2 == 0) {
+                    bi_n.at<cv::Vec3b>(x , y)[0] = (bi_n.at<cv::Vec3b>(x + 1, y)[0] + bi_n.at<cv::Vec3b>(x + 1, y)[0]) / 2;
+                    bi_n.at<cv::Vec3b>(x , y)[1] = (bi_n.at<cv::Vec3b>(x + 1, y)[1] + bi_n.at<cv::Vec3b>(x + 1, y)[1]) / 2;
+                    bi_n.at<cv::Vec3b>(x , y)[2] = (bi_n.at<cv::Vec3b>(x + 1, y)[2] + bi_n.at<cv::Vec3b>(x + 1, y)[2]) / 2;
+                } else if(conta % 2 != 0) {
+                    //cout << x << " " << y << ":" << conta << endl;
+                    bi_n.at<cv::Vec3b>(x , y)[0] = (bi_n.at<cv::Vec3b>(x - 1, y - 1)[0] + bi_n.at<cv::Vec3b>(x - 1, y + 1)[0] + bi_n.at<cv::Vec3b>(x + 1, y - 1)[0] + bi_n.at<cv::Vec3b>(x + 1, y + 1)[0]) /4;
+                    bi_n.at<cv::Vec3b>(x , y)[1] = (bi_n.at<cv::Vec3b>(x - 1, y - 1)[1] + bi_n.at<cv::Vec3b>(x - 1, y + 1)[1] + bi_n.at<cv::Vec3b>(x + 1, y - 1)[1] + bi_n.at<cv::Vec3b>(x + 1, y + 1)[1]) /4;
+                    bi_n.at<cv::Vec3b>(x , y)[2] = (bi_n.at<cv::Vec3b>(x - 1, y - 1)[2] + bi_n.at<cv::Vec3b>(x - 1, y + 1)[2] + bi_n.at<cv::Vec3b>(x + 1, y - 1)[2] + bi_n.at<cv::Vec3b>(x + 1, y + 1)[2]) /4;
+                }
+                conta++;
+            }
+
+        }
+    }
+
+
+    cv::namedWindow("Nova_bi", cv::WINDOW_AUTOSIZE);
+    cv::imshow("Nova_bi",bi_n);
+}
 
 /*
 
