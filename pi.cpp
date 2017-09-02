@@ -78,52 +78,65 @@ int main(int argc, const char *argv[])
     return 0;
 }
 
-class rotulo {
+class rot_ulo {
     public:
-        cv::Scalar getCor();
-        string getNome();
-        rotulo();
-    
+        cv::Scalar getCor() { return new_cor; }
+        rot_ulo(string name);
+
     private:
-        cv::Scalar setCor();
-        cv::Scalar cor;
+        int qtd_rots = 1;
         string nome;
+        cv::Scalar new_cor;
+        void setN_cor();
 };
 
-cv::Scalar rotulo::setCor() {
+rot_ulo::rot_ulo(string name) { nome = name; rot_ulo::setN_cor(); }
+        
+void rot_ulo::setN_cor() {
     cv::RNG rng(12345);
-    cor = cv::Scalar(rng.uniform(0,255), rng.uniform(0, 255), rng.uniform(0, 255));
+    cv::Scalar new_cor = cv::Scalar(rng.uniform(0,255), rng.uniform(0, 255), rng.uniform(0, 255));
 }
-
-string rotulo::getNome(){
-    return nome;
-}
-
-cv::Scalar rotulo::getCor(){
-    return cor;
-}
-
 
 void rotulacao(cv::Mat image) {
-    vector<rotulo> v_rotulos;
-    cv::Mat img_rotulada = cv::Mat::zeros(image.cols, image.rows, CV_8UC3);
+    vector<rot_ulo> v_rotulos;
+    cout << image.cols << ":" << image.rows << endl;
+    cv::Mat img_rotulada = cv::Mat::zeros(image.rows, image.cols, CV_8UC3);
+    cout << img_rotulada.cols << ":" << img_rotulada.rows << endl;
    
+    int r ,t, qtd = 0;
 
      for (int y = 0; y <= image.rows  ; y++) {
         for (int x = 0; x <= image.cols  ; x++) {
             //cout << (int)image.at<uchar>(y,x) << endl;
-            int r = (int)image.at<uchar>(y    ,x - 1);
-            int p = (int)image.at<uchar>(y - 1,x    );
+            if ( x - 1 > 0 ) {
+                r = (int)image.at<uchar>(y    ,x - 1);
+            } else {
+                r = -1;
+            }
+
+            if ( y - 1 > 0 ) {
+                t = (int)image.at<uchar>(y - 1 ,x   );
+            } else {
+                t = -1;
+            }
             
             //Se p = 0 então verifica o próximo pixel;
-            //Se p =1, examina r e t
+            //Se p = 1, examina r e t
             if((int)image.at<uchar>(y,x) != 0) {
-                if(r == 0 && p == 0) {
-                    //novo rotulo
-                } else if (r != 0 && p == 0 || r == 0 && p != 0) {
-                    //rotula com o valor de r ou p
-                }
+                if(r == 0 && t == 0) {
+                    qtd++;
+                    rot_ulo novoo(to_string(qtd));
+                    v_rotulos.push_back(novoo);
+
+                    //cout << v_rotulos.size() << endl;
+                    img_rotulada.at<cv::Scalar>(y,x) = cv::Scalar(255,255,127);
+                } 
             }
         }
     }
+
+
+     cv::namedWindow("nova_img");
+     imshow("nova_img",img_rotulada);
 }
+
