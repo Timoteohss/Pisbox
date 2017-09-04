@@ -1,4 +1,6 @@
 #include <iostream>
+#include <memory>
+#include <fstream>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -78,65 +80,69 @@ int main(int argc, const char *argv[])
     return 0;
 }
 
-class rot_ulo {
-    public:
-        cv::Scalar getCor() { return new_cor; }
-        rot_ulo(string name);
 
-    private:
-        int qtd_rots = 1;
-        string nome;
-        cv::Scalar new_cor;
-        void setN_cor();
-};
+cv::Mat pintaVizinhos(cv::Mat image, cv::Point ponto, cv::Mat novaimg, int r, int b, int g) {
 
-rot_ulo::rot_ulo(string name) { nome = name; rot_ulo::setN_cor(); }
-        
-void rot_ulo::setN_cor() {
-    cv::RNG rng(12345);
-    cv::Scalar new_cor = cv::Scalar(rng.uniform(0,255), rng.uniform(0, 255), rng.uniform(0, 255));
+    image.at<uchar>(cv::Point(ponto.x,ponto.y)) = 0;
+    novaimg.at<cv::Vec3b>(ponto)[0] = r;
+    novaimg.at<cv::Vec3b>(ponto)[1] = g;
+    novaimg.at<cv::Vec3b>(ponto)[2] = b;
+    
+    if((int)image.at<uchar>(cv::Point(ponto.x + 1,ponto.y)) != 0 && novaimg.at<cv::Vec3b>(cv::Point(ponto.x + 1,ponto.y))[0] == 0 && ponto.x + 1 < image.cols -1) {
+        // cout << "indo para baixo" << endl;
+        novaimg = pintaVizinhos(image, cv::Point(ponto.x + 1,ponto.y),novaimg,r,g,b);
+    }
+
+    if((int)image.at<uchar>(cv::Point(ponto.x,ponto.y + 1)) != 0 && novaimg.at<cv::Vec3b>(cv::Point(ponto.x,ponto.y + 1))[0] == 0 && ponto.y + 1 < image.rows -1) {
+        // cout << "indo para direita" << endl;
+        novaimg = pintaVizinhos(image, cv::Point(ponto.x,ponto.y+1),novaimg,r,g,b);
+    }
+
+    if((int)image.at<uchar>(cv::Point(ponto.x,ponto.y - 1)) != 0 && novaimg.at<cv::Vec3b>(cv::Point(ponto.x,ponto.y - 1))[0] == 0 && ponto.y - 1 > 0) {
+        // cout << "indo para esquerda" << endl;
+        novaimg = pintaVizinhos(image, cv::Point(ponto.x,ponto.y-1),novaimg,r,g,b);
+    }
+
+    if((int)image.at<uchar>(cv::Point(ponto.x - 1,ponto.y)) != 0 && novaimg.at<cv::Vec3b>(cv::Point(ponto.x - 1,ponto.y))[0] == 0 && ponto.x - 1 > 0) {
+        // cout << "indo para cima" << endl;
+        novaimg = pintaVizinhos(image, cv::Point(ponto.x - 1,ponto.y),novaimg,r,g,b);
+    }
+
+    return novaimg;
 }
 
+
 void rotulacao(cv::Mat image) {
-    vector<rot_ulo> v_rotulos;
-    cout << image.cols << ":" << image.rows << endl;
-    cv::Mat img_rotulada = cv::Mat::zeros(image.rows, image.cols, CV_8UC3);
-    cout << img_rotulada.cols << ":" << img_rotulada.rows << endl;
-   
-    int r ,t, qtd = 0;
+cv::Mat copia = image.clone();
+cv::Mat novaimg = cv::Mat::zeros(image.rows, image.cols, CV_8UC3);
+cv::namedWindow("kek");
+int contador = 1;
 
-     for (int y = 0; y <= image.rows  ; y++) {
-        for (int x = 0; x <= image.cols  ; x++) {
-            //cout << (int)image.at<uchar>(y,x) << endl;
-            if ( x - 1 > 0 ) {
-                r = (int)image.at<uchar>(y    ,x - 1);
-            } else {
-                r = -1;
-            }
 
-            if ( y - 1 > 0 ) {
-                t = (int)image.at<uchar>(y - 1 ,x   );
-            } else {
-                t = -1;
-            }
-            
-            //Se p = 0 então verifica o próximo pixel;
-            //Se p = 1, examina r e t
-            if((int)image.at<uchar>(y,x) != 0) {
-                if(r == 0 && t == 0) {
-                    qtd++;
-                    rot_ulo novoo(to_string(qtd));
-                    v_rotulos.push_back(novoo);
 
-                    //cout << v_rotulos.size() << endl;
-                    img_rotulada.at<cv::Scalar>(y,x) = cv::Scalar(255,255,127);
-                } 
+     for (int y = 0; y <= copia.rows - 1 ; y++) {
+        for (int x = 0; x <= copia.cols - 1 ; x++) {
+            if((int)copia.at<uchar>(cv::Point(x,y)) != 0 && 
+            novaimg.at<cv::Vec3b>(cv::Point(x,y))[0] == 0 &&
+            novaimg.at<cv::Vec3b>(cv::Point(x,y))[1] == 0 &&
+            novaimg.at<cv::Vec3b>(cv::Point(x,y))[2] == 0) {
+
+
+                cv::RNG rng (contador);
+                int r = rng.uniform(0,255);
+                int b = rng.uniform(0,255);
+                int g = rng.uniform(0,255);
+                contador++;
+                //cout << contador << endl;
+                
+                novaimg = pintaVizinhos(copia, cv::Point(x,y), novaimg, r, b, g);
+                cv::imshow("kek",novaimg);
+                //cv::waitKey(0);
             }
         }
     }
 
+    cout << contador << " grupos diferentes encontrados" << endl;   
 
-     cv::namedWindow("nova_img");
-     imshow("nova_img",img_rotulada);
 }
 
