@@ -26,5 +26,12 @@ Para compilar o projeto inicial, apenas escreva
 
 ```sh
 $ g++ -std=c++11 pi.cpp -o pisdbox `pkg-config --libs opencv`
-$ ./pisdbox <nome da imagem>
 ```
+
+Para rodar o projeto, escreva
+
+```sh
+$ ./pisdbox rotulamento.jpg
+```
+
+A imagem rotulamento.jpg está inclusa neste projeto para fins de teste.
