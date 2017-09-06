@@ -1,6 +1,6 @@
 #include <iostream>
-#include <memory>
-#include <fstream>
+#include <stdlib.h>
+#include <time.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -83,7 +83,7 @@ int main(int argc, const char *argv[])
 
 cv::Mat pintaVizinhos(cv::Mat image, cv::Point ponto, cv::Mat novaimg, int r, int b, int g) {
 
-    image.at<uchar>(cv::Point(ponto.x,ponto.y)) = 0;
+    image.at<uchar>(ponto) = 0;
     novaimg.at<cv::Vec3b>(ponto)[0] = r;
     novaimg.at<cv::Vec3b>(ponto)[1] = g;
     novaimg.at<cv::Vec3b>(ponto)[2] = b;
@@ -117,6 +117,7 @@ cv::Mat copia = image.clone();
 cv::Mat novaimg = cv::Mat::zeros(image.rows, image.cols, CV_8UC3);
 cv::namedWindow("kek");
 int contador = 1;
+srand (time(NULL));
 
 
 
@@ -127,11 +128,9 @@ int contador = 1;
             novaimg.at<cv::Vec3b>(cv::Point(x,y))[1] == 0 &&
             novaimg.at<cv::Vec3b>(cv::Point(x,y))[2] == 0) {
 
-
-                cv::RNG rng (contador);
-                int r = rng.uniform(0,255);
-                int b = rng.uniform(0,255);
-                int g = rng.uniform(0,255);
+                int r = rand() % 255 + 1;
+                int b = rand() % 255 + 1;
+                int g = rand() % 255 + 1;
                 contador++;
                 //cout << contador << endl;
                 
