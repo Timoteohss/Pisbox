@@ -26,5 +26,12 @@ Para compilar o projeto inicial, apenas escreva
 
 ```sh
 $ g++ -std=c++11 pi.cpp -o pisdbox `pkg-config --libs opencv`
-$ ./pisdbox <nome da imagem>
 ```
+
+Para rodar o projeto, escreva
+
+```sh
+$ ./pisdbox <NOME_DA_IMAGEM>
+```
+
+A imagem lena.png já está inclusa no projeto e pode ser utilizada conforme necessário.
