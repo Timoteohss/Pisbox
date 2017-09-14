@@ -74,6 +74,7 @@ int main(int argc, const char *argv[])
 
     while(true) {
         dBuffer.copyTo(frame);
+        
         cvui::checkbox(frame,10,10,"Mostrar Menu", &escondeMenu);
         if(escondeMenu){
             cvui::window(frame, 20, 50, 180, 240, "Controle");
