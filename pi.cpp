@@ -40,6 +40,25 @@ cv::Mat func_subtracao(cv::Mat src1, cv::Mat src2) {
     return temp;
 }
 
+cv::Mat rotacao(cv::Mat src1, double angle) {
+    cv::Mat temp = cv::Mat::zeros(src1.rows + src1.cols, src1.cols + src1.rows, CV_8UC3);
+
+    for (int y = 0; y <= src1.rows - 1 ; y++) {
+        for (int x = 0; x <= src1.cols - 1 ; x++) {
+            int nnx = x + floor(src1.cols / 2);
+            int nny = y + floor(src1.rows / 2);
+            int nx = nnx * cos(angle) - nny * sin(angle);
+            int ny = nnx * cos(angle) + nny * sin(angle);
+
+            temp.at<cv::Vec3b>(cv::Point(nnx,nny))[0] = src1.at<cv::Vec3b>(cv::Point(nx,ny))[0];
+            temp.at<cv::Vec3b>(cv::Point(nnx,nny))[1] = src1.at<cv::Vec3b>(cv::Point(nx,ny))[1];
+            temp.at<cv::Vec3b>(cv::Point(nnx,nny))[2] = src1.at<cv::Vec3b>(cv::Point(nx,ny))[2];
+        }
+    }
+    
+    return temp;
+}
+
 
 int main(int argc, const char *argv[])
 {
@@ -54,13 +73,14 @@ int main(int argc, const char *argv[])
 
     cv::Mat image2 = cv::imread(argv[2]);
     cv::Mat frame2 = image2.clone();
+    cv::Mat dst;
 
 
     //variaveis de ambiente
     int trackbarWidth = 130;
-    double angle = 0.0;
+    double angle = 15.0;
     bool escondeMenu = false;
-    bool adicao = true;
+    bool adicao = false;
     bool subtracao = false;
     bool inverter = false;
 
@@ -70,6 +90,7 @@ int main(int argc, const char *argv[])
     cvui::init(WINDOW_NAME, 20); //Aperte "q" para sair
     
     cv::moveWindow(WINDOW_NAME, 10, 20);
+
   
 
     while(true) {
@@ -90,8 +111,13 @@ int main(int argc, const char *argv[])
                 cvui::checkbox("Inverter", &inverter);
             }
 
-            if(cvui::button("Girar 15")) {
-                
+            cvui::trackbar(trackbarWidth, &angle, (double)0., (double)90., 2, "%3.02Lf");
+        
+            if(cvui::button("Girar")) {
+                cv::Point2f src_center(dBuffer.cols/2.0F, dBuffer.rows/2.0F);
+                cv::Mat rot_mat = cv::getRotationMatrix2D(src_center, angle, 1.0);
+                cv::warpAffine(dBuffer, dst, rot_mat, dBuffer.size());
+                cv::imshow("kek",dst);
             }
         
 
