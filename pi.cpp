@@ -36,6 +36,20 @@ cv::Mat negativa(cv::Mat src) {
     return temp;
 }
 
+cv::Mat powerLaw(cv::Mat src, double c , double pl) {
+    cv::Mat temp = cv::Mat::zeros(src.rows, src.cols, CV_8UC1);
+
+    for( int y = 0; y <= src.cols - 1; y++ ) { 
+        for( int x = 0; x <= src.rows - 1; x++ ) {
+            double rex = src.at<uchar>(cv::Point(x,y));
+
+                temp.at<uchar>(cv::Point(x,y)) = c * pow(rex,pl);         
+        }
+    }
+
+    return temp;
+}
+
 cv::Mat logaritmica(cv::Mat src, double contrast) {
     cv::Mat temp = cv::Mat::zeros(src.rows, src.cols, CV_8UC1);
 
@@ -69,11 +83,14 @@ int main(int argc, const char *argv[])
     bool ala_esc = false;
     bool log_esc = false;
     bool neq_esc = false;
+    bool pow_esc = false;
     int alt_menu = 130;
     double cont_log = 3;
 
     double alpha_a = 1.0;
     int beta_b = 50.0;
+    double pl_c = 1.0;
+    double pl_y = 0.5;
     
 
     cv::namedWindow(WINDOW_NAME);
@@ -94,7 +111,7 @@ int main(int argc, const char *argv[])
             cvui::space(3);
             cvui::checkbox("Threshhold",&the_esc);
             if(the_esc){
-                alt_menu = 280;
+                alt_menu = 300;
                 cvui::space(2);
                 cvui::text("Threshold");
                 if (cvui::trackbar(trackbarWidth, &limite, (int)0, (int)254, 2)) {
@@ -104,7 +121,7 @@ int main(int argc, const char *argv[])
             cvui::space(3);
             cvui::checkbox("Alargamento",&ala_esc);
             if(ala_esc){
-                alt_menu = 370;
+                alt_menu = 400;
                 cvui::space(2);
                 cvui::text("Alpha");
                 if (cvui::trackbar(trackbarWidth, &alpha_a, (double)0, (double)3, 2.0d)) {
@@ -120,7 +137,7 @@ int main(int argc, const char *argv[])
             cvui::space(3);
             cvui::checkbox("Negativo",&neq_esc);
             if(neq_esc){
-                alt_menu = 230;
+                alt_menu = 300;
                 if (cvui::button("Negativo")) {
                     dBuffer = negativa(image.clone());
                 }
@@ -130,11 +147,27 @@ int main(int argc, const char *argv[])
             cvui::space(3);
             cvui::checkbox("Logaritmica",&log_esc);
             if(log_esc){
-                alt_menu = 230;
-                if (cvui::trackbar(trackbarWidth, &cont_log, (double)0, (double)100, 2.0d)) {
+                alt_menu = 300;
+                if (cvui::trackbar(trackbarWidth, &cont_log, (double)0, (double)45, 2.0d)) {
                         modificado = true;
                 }
                 cvui::space(3);
+            }
+
+            cvui::space(3);
+            cvui::checkbox("PowerLaw",&pow_esc);
+            if(pow_esc){
+                alt_menu = 400;
+                cvui::space(2);
+                cvui::text("C");
+                if (cvui::trackbar(trackbarWidth, &pl_c, (double)0, (double)3, 1.0d)) {
+                        modificado = true;
+                }
+                cvui::space(1);
+                cvui::text("Y");
+                if (cvui::trackbar(trackbarWidth, &pl_y, (double)0, (double)1, 0.1d)) {
+                        modificado = true;
+                }
             }
 
 
@@ -147,6 +180,9 @@ int main(int argc, const char *argv[])
                 }
                 else if(log_esc) {
                     dBuffer = logaritmica(image.clone(),cont_log);
+                }
+                else if(pow_esc) {
+                    dBuffer = powerLaw(image.clone(),pl_c,pl_y);
                 }
             }
 
