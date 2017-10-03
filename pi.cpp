@@ -1,4 +1,5 @@
 #include <iostream>
+#include <tuple>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -12,6 +13,20 @@
 
 using namespace std;
 
+
+vector<tuple<int,int>> fazHist(cv::Mat image) {
+	vector<tuple<int,int>> hist;
+	int contador = 0;
+	
+	for(int i = 0; i < image.cols - 1 ; i++) {
+		for(int j = 0; j < image.rows - 1; j ++) {
+			auto temp = make_tuple(contador,image.at<uchar>(cv::Point(i,j)));
+			contador++;
+			hist.push_back(temp);
+		}
+	}
+	return hist;
+}
 
 int main(int argc, const char *argv[])
 {
@@ -40,6 +55,9 @@ int main(int argc, const char *argv[])
         if (cvui::button(frame, frame.cols - 70, frame.rows - 30, "&Quit")) {
             break;
         }
+	if (cvui::button(frame, frame.cols -140, frame.rows -30, "Hist")) {
+		auto hist = fazHist(image);
+	}
 
             
 
