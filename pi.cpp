@@ -1,5 +1,5 @@
 #include <iostream>
-#include <tuple>
+#include <map>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -13,16 +13,37 @@
 
 using namespace std;
 
+cv::Mat equaliza(cv::Mat src, vector<double> eq) {
+    cv::Mat temp = cv::Mat::zeros(src.rows, src.cols, CV_8UC1);
 
-vector<tuple<int,int>> fazHist(cv::Mat image) {
-	vector<tuple<int,int>> hist;
-	int contador = 0;
+      for( int y = 0; y < src.cols; y++ ) { 
+        for( int x = 0; x < src.rows; x++ ) {
+                temp.at<uchar>(cv::Point(x,y)) = eq.at(src.at<uchar>(cv::Point(x,y)));
+        }
+    }
+
+    return temp;
+}
+
+vector<int> inicia(vector<int> temp) {
+    for(int i = 0; i < 256; i++) { temp.push_back(0); }
+    return temp;
+}
+
+vector<double> inicia(vector<double> temp) {
+    for(int i = 0; i < 256; i++) { temp.push_back(0.0); }
+    return temp;
+}
+
+
+vector<int> fazHist(cv::Mat image) {
+    vector<int> hist = inicia(hist);
+
+    for(int i = 0; i < 256; i++) { hist.push_back(0); }
 	
 	for(int i = 0; i < image.cols - 1 ; i++) {
 		for(int j = 0; j < image.rows - 1; j ++) {
-			auto temp = make_tuple(contador,image.at<uchar>(cv::Point(i,j)));
-			contador++;
-			hist.push_back(temp);
+			hist.at(image.at<uchar>(cv::Point(i,j)))++;
 		}
 	}
 	return hist;
@@ -35,7 +56,7 @@ int main(int argc, const char *argv[])
         return -1;
     }
 
-    cv::Mat image = cv::imread(argv[1]);
+    cv::Mat image = cv::imread(argv[1],CV_LOAD_IMAGE_GRAYSCALE);
     cv::Mat frame = image.clone();
     cv::Mat dBuffer = frame.clone();
 
@@ -55,9 +76,58 @@ int main(int argc, const char *argv[])
         if (cvui::button(frame, frame.cols - 70, frame.rows - 30, "&Quit")) {
             break;
         }
-	if (cvui::button(frame, frame.cols -140, frame.rows -30, "Hist")) {
-		auto hist = fazHist(image);
-	}
+	    if (cvui::button(frame, frame.cols -140, frame.rows -30, "Hist")) {
+		    auto hist = fazHist(image);
+            double nk = 0.0;
+
+            for(int i = 0; i < 256; i++) {
+                nk+=hist.at(i);
+                // cout << "Posicao " << i << ": " << hist.at(i) << endl;
+            }
+
+            cout << "nk:" <<nk << endl;
+    
+
+            vector<double> prk = inicia(prk);
+            for(int i = 0; i < 256; i++) {
+                if(hist.at(i) != 0){
+                    prk.at(i) = (double)hist.at(i)/nk;
+                } else {
+                    prk.at(i) = 0.0;
+                } 
+                cout << "Prk Posicao " << i << ": " << prk.at(i) << endl;
+            }
+
+
+            vector<double> freq = inicia(freq);
+
+            for(int i = 0; i < 256; i++) {
+                if(i-1 >= 0){
+                    freq.at(i) = prk.at(i) + prk.at(i-1);
+                } else {
+                    freq.at(i) = prk.at(i);
+                }
+                cout << "Freq Posicao " << i << ": " << freq.at(i) << endl;
+            }
+
+            vector<double> eq = inicia(eq);
+            double max = 0,min = 256;
+            for(int i = 0; i < 256; i++) {
+                eq.at(i) = 255*prk.at(i);
+                if(max < eq.at(i)) { max = eq.at(i); }
+                if(min > eq.at(i)) { min = eq.at(i); }
+            }
+            for(int i = 0; i < 256; i++) {
+                eq.at(i) = ceil((eq.at(i) - min) * (255/(max-min)));
+                cout << "EQ Posicao " << i << ": " << eq.at(i) << endl;
+            }
+
+            dBuffer = equaliza(image,eq);
+
+
+
+
+        }
 
             
 
