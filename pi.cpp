@@ -9,14 +9,6 @@
 #define WINDOW_NAME "Sandbox PI"
 
 
-// g++ -std=c++11 pi.cpp -o pisdbox `pkg-config --libs opencv`
-
-using namespace std;
-
-// cv::Mat equaliza(cv::Mat src, cv::Mat dst) {
-//     return cv::equalizeHist(src,dst);
-// }
-
 vector<int> inicia() {
     vector<int> temp;
     for(int i = 0; i < 256; i++) { temp.push_back(0); }
@@ -122,10 +114,7 @@ int main(int argc, const char *argv[])
 	    if (cvui::button(frame, frame.cols -140, frame.rows -30, "Hist")) {
 		    auto hist = fazHist(image);
             
-            //dBuffer = eqHist(image,hist);
-          
-            cv::equalizeHist(image, dBuffer);
-
+            dBuffer = eqHist(image,hist);
         }
 
             
