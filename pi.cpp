@@ -68,11 +68,8 @@ cv::Mat filtra(cv::Mat src,int control) {
                     muda(1,1,1,1,1,1,1,1,1);
                     tempo.at<uchar>(cv::Point(i,j)) = convolucao(i,j,3,src);
                     break;
-                case 2:
-                    tempo.at<uchar>(cv::Point(i,j)) = convolucao(i,j,3,src);
-                    break;
                 default:
-                    tempo = src;
+                    tempo.at<uchar>(cv::Point(i,j)) = convolucao(i,j,3,src);
                     break;
             }
         }
@@ -102,11 +99,15 @@ int main(int argc, const char *argv[])
     bool mostra_menu = true;
     bool fil_media = false;
     bool fil_laplaciano = false;
+    bool fil_sobel = false;
 
     bool fil_L1 = false;
     bool fil_L2 = false;
     bool fil_L3 = false;
     bool fil_L4 = false;
+    bool fil_h = false;
+    bool fil_v = false;
+    bool soma_sobel = false;
     
 
     cv::namedWindow(WINDOW_NAME);
@@ -124,16 +125,34 @@ int main(int argc, const char *argv[])
             cvui::space(3);
             cvui::checkbox("Media",&fil_media);
             cvui::checkbox("Laplaciano",&fil_laplaciano);
+            cvui::checkbox("Sobel",&fil_sobel);
             if(fil_media) {
                 dBuffer = filtra(image,1);
             } else if (fil_laplaciano) {
-                if(cvui::checkbox("L1",&fil_L1)){muda(0,1,0,1,-4,1,0,1,0);}
-                if(cvui::checkbox("L2",&fil_L2)){muda(1,1,1,1,-8,1,1,1,1);}
-                if(cvui::checkbox("L3",&fil_L3)){muda(0,-1,0,-1,4,-1,0,-1,0);}
-                if(cvui::checkbox("L4",&fil_L4)){muda(-1,-1,-1,-1,8,-1,-1,-1,-1);}
+                if(cvui::checkbox("0,1,-4",&fil_L1)){muda(0,1,0,1,-4,1,0,1,0);}
+                if(cvui::checkbox("1,-8",&fil_L2)){muda(1,1,1,1,-8,1,1,1,1);}
+                if(cvui::checkbox("0,-1,4",&fil_L3)){muda(0,-1,0,-1,4,-1,0,-1,0);}
+                if(cvui::checkbox("-1,8",&fil_L4)){muda(-1,-1,-1,-1,8,-1,-1,-1,-1);}
                 dBuffer = filtra(image,2);
+            } else if(fil_sobel){
+                if(cvui::checkbox("Horizontal",&fil_h)){muda(-1,-2,-1,0,0,0,1,2,1);}
+                if(cvui::checkbox("Vertical",&fil_v)){muda(-1,0,1,-2,0,2,-1,0,1);}
+                dBuffer = filtra(image,3);
+
+                if(cvui::checkbox("Soma",&soma_sobel)) {
+                    muda(-1,-2,-1,0,0,0,1,2,1);
+                    cv::Mat h = filtra(image,3);
+                    muda(-1,0,1,-2,0,2,-1,0,1);
+                    dBuffer = h + filtra(image,3);
+
+                }
             } else {
-                dBuffer = image;
+
+            }
+
+            if(cvui::button("Negativa")) {
+                cv::Mat sub_mat = cv::Mat::ones(image.size(), image.type())*255;
+                cv::subtract(sub_mat, dBuffer, dBuffer);
             }
 
 
