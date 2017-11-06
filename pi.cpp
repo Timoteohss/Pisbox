@@ -8,80 +8,30 @@
 
 #define WINDOW_NAME "Sandbox PI"
 
-
-vector<int> inicia() {
-    vector<int> temp;
-    for(int i = 0; i < 256; i++) { temp.push_back(0); }
-    return temp;
-}
-vector<double> iniciaD() {
-    vector<double> temp;
-    for(int i = 0; i < 256; i++) { temp.push_back(0.0); }
-    return temp;
-}
-
-cv::Mat eqHist(cv::Mat src, vector<int> hist) {
-      
-            double nk = 0.0;
-
-            for(int i = 0; i < 256; i++) {
-                nk+=hist.at(i);
-                // cout << "Posicao " << i << ": " << hist.at(i) << endl;
-            }
-
-            cout << "nk:" <<nk << endl;
-    
-
-            vector<double> prk = iniciaD();
-            for(int i = 0; i < 256; i++) {
-                if(hist.at(i) != 0){
-                    prk.at(i) = (double)hist.at(i)/nk;
-                } else {
-                    prk.at(i) = 0.0;
-                } 
-                // cout << "Prk Posicao " << i << ": " << prk.at(i) << endl;
-            }
+using namespace std;
 
 
-            vector<double> freq = iniciaD();
-
-            for(int i = 0; i < 256; i++) {
-                if(i-1 >= 0){
-                    freq.at(i) = prk.at(i) + prk.at(i-1);
-                } else {
-                    freq.at(i) = prk.at(i);
-                }
-                // cout << "Freq Posicao " << i << ": " << freq.at(i) << endl;
-            }
-
-            vector<double> eq = iniciaD();
-            double max = 0,min = 256;
-            for(int i = 0; i < 256; i++) {
-                eq.at(i) = 255*prk.at(i);
-                if(max < eq.at(i)) { max = eq.at(i); }
-                if(min > eq.at(i)) { min = eq.at(i); }
-            }
-            for(int i = 0; i < 256; i++) {
-                eq.at(i) = ceil((eq.at(i) - min) * (255/(max-min)));
-                // cout << "EQ Posicao " << i << ": " << eq.at(i) << endl;
-            }
-
-}
-
-
-
-
-vector<int> fazHist(cv::Mat image) {
-    vector<int> eq = inicia();
-
-    for(int i = 0; i < 256; i++) { eq.push_back(0); }
+vector<int> getHist(cv::Mat src) {
+	vector<int> temp;
 	
-	for(int i = 0; i < image.cols - 1 ; i++) {
-		for(int j = 0; j < image.rows - 1; j ++) {
-			eq.at(image.at<uchar>(cv::Point(i,j)))++;
+	for(int i = 0; i < src.cols; i++) {
+		for(int j = 0; j < src.rows; j ++) {
+			temp.push_back((int)src.at<uchar>(cv::Point(i,j)));
 		}
 	}
-	return eq;
+	return temp;
+}
+
+vector<int> findVale(vector<int> thr) {
+	vector<int> temp;
+	
+	for(int i = 1; i < thr.size() - 1; i++) {
+		if(thr[i-1] > thr[i] && thr[i+1] > thr[i]) {
+			temp.push_back(thr[i]);
+		}
+	}
+
+	return temp;
 }
 
 int main(int argc, const char *argv[])
@@ -94,10 +44,6 @@ int main(int argc, const char *argv[])
     cv::Mat image = cv::imread(argv[1],CV_LOAD_IMAGE_GRAYSCALE);
     cv::Mat frame = image.clone();
     cv::Mat dBuffer = frame.clone();
-
-    //variaveis de ambiente
-    int trackbarWidth = 130;
-    
 
     cv::namedWindow(WINDOW_NAME);
     cvui::init(WINDOW_NAME, 20); //Aperte "q" para sair
@@ -112,9 +58,10 @@ int main(int argc, const char *argv[])
             break;
         }
 	    if (cvui::button(frame, frame.cols -140, frame.rows -30, "Hist")) {
-		    auto hist = fazHist(image);
-            
-            dBuffer = eqHist(image,hist);
+		vector<int> thr = findVale(getHist(image));
+		sort(thr.begin(),thr.end());
+		cout << thr[thr.size()] << endl;
+		dBuffer = image.clone() > thr[thr.size()];	
         }
 
             
